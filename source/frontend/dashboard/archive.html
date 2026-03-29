@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Historical Data Analysis</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-page="archive">
+    <div class="page-shell">
+        <header class="topbar">
+            <div></div>
+            <h1>Historical Data Analysis</h1>
+            <button id="goDashboardBtn" class="btn btn-primary">Dashboard</button>
+        </header>
+
+    <main class="archive-layout">
+        <section class="mtbe-box">
+            <table class="mtbe-table">
+            <thead>
+                <tr>
+                <th></th>
+                <th>Earthquake</th>
+                <th>Conventional Explosion</th>
+                <th>Nuclear Explosion</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                <th>MTBE</th>
+                <td id="mtbeEarthquake">-</td>
+                <td id="mtbeConventional">-</td>
+                <td id="mtbeNuclear">-</td>
+                </tr>
+            </tbody>
+            </table>
+        </section>
+
+        <section class="filters-card">
+            <div class="range-group">
+                <label class="field-label">Date Range:</label>
+                <div class="range-inputs">
+                <input id="dateFromFilter" class="text-input small-input" type="date" />
+                <input id="dateToFilter" class="text-input small-input" type="date" />
+                </div>
+            </div>
+
+            <label class="field-label">Event Type:</label>
+            <select id="eventTypeFilter" class="text-input">
+                <option value="">All</option>
+                <option value="Earthquake">Earthquake</option>
+                <option value="Conventional Explosion">Conventional Explosion</option>
+                <option value="Nuclear Explosion">Nuclear Explosion</option>
+            </select>
+
+            <label class="field-label">Sensor ID:</label>
+            <input id="sensorIdFilter" class="text-input" type="text" placeholder="Enter Sensor ID" />
+
+            <div class="range-group">
+                <label class="field-label">Latitude Range:</label>
+                <div class="range-inputs">
+                <input id="latitudeFromFilter" class="text-input small-input" type="number" step="any" placeholder="From" />
+                <input id="latitudeToFilter" class="text-input small-input" type="number" step="any" placeholder="To" />
+                </div>
+            </div>
+
+            <div class="range-group">
+                <label class="field-label">Longitude Range:</label>
+                <div class="range-inputs">
+                <input id="longitudeFromFilter" class="text-input small-input" type="number" step="any" placeholder="From" />
+                <input id="longitudeToFilter" class="text-input small-input" type="number" step="any" placeholder="To" />
+                </div>
+            </div>
+
+            <div class="filters-actions">
+                <button id="applyFiltersBtn" class="btn btn-green">Apply Filters</button>
+                <button id="clearFiltersBtn" class="btn btn-red">Clear Filters</button>
+            </div>
+        </section>
+
+        <section class="history-panel">
+            <div class="table-scroll history-scroll">
+            <table class="data-table" id="archiveTable">
+                <thead>
+                <tr>
+                    <th>Event ID</th>
+                    <th>Type</th>
+                    <th>Frequency (Hz)</th>
+                    <th>Sensor ID</th>
+                    <th>Timestamp</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            </div>
+        </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -73,15 +73,15 @@ In order to localize the source of the alert
 
 ## 13
 
-As a user
-I want to see the list of available sensors	
-In order to have an overview of the monitored sources
+As a user  
+I want to see the list of available sensors  	
+In order to have an overview of the monitored sources  
 
 ## 14
 
-As a user
-I want to know the number of detected events for each sensor
-In order to quantitatively estimate seismic activity
+As a user  
+I want to know the number of detected events for each sensor  
+In order to quantitatively estimate seismic activity  
 
 ## 15
 
@@ -115,14 +115,14 @@ In order to perform analysis on them
 
 ## 20
 
-As a user  				
-I want to filter the detected events  	
-In order to have a time-based view  	
+As a user   				
+I want to filter the detected events   	
+In order to have a time-based view   	
 
 ## 21
 
-As a user  				
-I want to filter the detected events  	
+As a user   				
+I want to filter the detected events    	
 In order to have a type-based view  	
 
 ## 22

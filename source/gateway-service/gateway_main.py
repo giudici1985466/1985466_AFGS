@@ -9,6 +9,7 @@ import httpx
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
 PORT = int(os.getenv("PORT", "8200"))
 POSTGRES_DSN = os.getenv(
@@ -28,6 +29,18 @@ OFFLINE_AFTER_FAILURES = 3
 LIVE_LIMIT = 5
 
 app = FastAPI(title="Gateway Service")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 db_pool: Optional[asyncpg.Pool] = None
 pu_status = {}
@@ -74,7 +87,9 @@ def parse_ts(ts: str) -> datetime:
     return datetime.fromisoformat(ts.replace("Z", "+00:00"))
 
 def second_bucket(ts: str) -> datetime:
-    return parse_ts(ts).astimezone(timezone.utc).replace(microsecond=0)
+    dt = parse_ts(ts).astimezone(timezone.utc).replace(microsecond=0)
+    bucket_second = dt.second - (dt.second % 3)  # 3-second window
+    return dt.replace(second=bucket_second)
 
 def serialize(row):
     item = dict(row)

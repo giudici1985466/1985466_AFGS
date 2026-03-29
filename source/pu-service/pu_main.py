@@ -13,7 +13,8 @@ from fastapi import FastAPI
 
 
 BROKER_WS = os.getenv("BROKER_WS", "ws://ingestion:8000/ws")
-SIMULATOR_HTTP = os.getenv("SIMULATOR_URL", "http://simulator:8080")
+SIMULATOR_HTTP = os.getenv("SIMULATOR_HTTP", "http://simulator:8080")
+GATEWAY_HTTP = os.getenv("GATEWAY_HTTP", "http://gateway:8200")
 SERVICE_ID = os.getenv("SERVICE_ID")
 
 PORT = 8100
@@ -156,12 +157,37 @@ def analyze_sensor(sensor_id):
 
     return detection
 
+async def send_detection_to_gateway(detection: dict):
+    payload = {
+        **detection,
+        "service_id": SERVICE_ID,
+    }
+
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                f"{GATEWAY_HTTP}/api/detections",
+                json=payload,
+                timeout=5.0,
+            )
+            r.raise_for_status()
+
+            result = r.json()
+            print(
+                f"Detection sent to gateway | stored={result.get('stored')} "
+                f"| dedup_key={result.get('dedup_key')}",
+                flush=True,
+            )
+
+    except Exception as e:
+        print(f"Failed to send detection to gateway: {e}", flush=True)
+
 
 
 async def broker_loop():
     while True:
         try:
-            print("Connecting to broker: {BROKER_WS}", flush=True)
+            print(f"Connecting to broker: {BROKER_WS}", flush=True)
 
             async with websockets.connect(BROKER_WS) as ws:
                 print("Connected to broker", flush=True)
@@ -191,7 +217,8 @@ async def broker_loop():
                     })
 
                     detection = analyze_sensor(sensor_id)
-                    
+                    if detection is not None:
+                        await send_detection_to_gateway(detection)
 
         except Exception as e:
             print("Broker error:", e)
@@ -271,6 +298,7 @@ async def health():
 @app.on_event("startup")
 async def startup():
     await wait_for_service(f"{SIMULATOR_HTTP}/health")
+    #await wait_for_service(f"{GATEWAY_HTTP}/health")
     await load_sensor_metadata()
     asyncio.create_task(broker_loop())
     asyncio.create_task(control_loop())

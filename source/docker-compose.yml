@@ -26,9 +26,11 @@ services:
     depends_on:
     - ingestion
     - simulator
+    - gateway
     environment:
       BROKER_WS: ws://ingestion:8000/ws
       SIMULATOR_HTTP: http://simulator:8080
+      GATEWAY_HTTP: http://gateway:8200
       PORT: 8100
       SERVICE_ID: pu_1
     ports:
@@ -39,9 +41,11 @@ services:
     depends_on:
       - ingestion
       - simulator
+      - gateway
     environment:
       BROKER_WS: ws://ingestion:8000/ws
       SIMULATOR_HTTP: http://simulator:8080
+      GATEWAY_HTTP: http://gateway:8200
       PORT: 8100
       SERVICE_ID: pu_2
     ports:
@@ -52,9 +56,11 @@ services:
     depends_on:
       - ingestion
       - simulator
+      - gateway
     environment:
       BROKER_WS: ws://ingestion:8000/ws
       SIMULATOR_HTTP: http://simulator:8080
+      GATEWAY_HTTP: http://gateway:8200
       PORT: 8100
       SERVICE_ID: pu_3
     ports:
@@ -65,9 +71,11 @@ services:
     depends_on:
       - ingestion
       - simulator
+      - gateway
     environment:
       BROKER_WS: ws://ingestion:8000/ws
       SIMULATOR_HTTP: http://simulator:8080
+      GATEWAY_HTTP: http://gateway:8200
       PORT: 8100
       SERVICE_ID: pu_4
     ports:
@@ -77,9 +85,11 @@ services:
     depends_on:
       - ingestion
       - simulator
+      - gateway
     environment:
       BROKER_WS: ws://ingestion:8000/ws
       SIMULATOR_HTTP: http://simulator:8080
+      GATEWAY_HTTP: http://gateway:8200
       PORT: 8100
       SERVICE_ID: pu_5
     ports:
@@ -90,9 +100,11 @@ services:
     depends_on:
       - ingestion
       - simulator
+      - gateway
     environment:
       BROKER_WS: ws://ingestion:8000/ws
       SIMULATOR_HTTP: http://simulator:8080
+      GATEWAY_HTTP: http://gateway:8200
       PORT: 8100
       SERVICE_ID: pu_6
     ports:
@@ -103,9 +115,11 @@ services:
     depends_on:
       - ingestion
       - simulator
+      - gateway
     environment:
       BROKER_WS: ws://ingestion:8000/ws
       SIMULATOR_HTTP: http://simulator:8080
+      GATEWAY_HTTP: http://gateway:8200
       PORT: 8100
       SERVICE_ID: pu_7
     ports:
@@ -116,9 +130,11 @@ services:
     depends_on:
       - ingestion
       - simulator
+      - gateway
     environment:
       BROKER_WS: ws://ingestion:8000/ws
       SIMULATOR_HTTP: http://simulator:8080
+      GATEWAY_HTTP: http://gateway:8200
       PORT: 8100
       SERVICE_ID: pu_8
     ports:
@@ -129,9 +145,11 @@ services:
     depends_on:
       - ingestion
       - simulator
+      - gateway
     environment:
       BROKER_WS: ws://ingestion:8000/ws
       SIMULATOR_HTTP: http://simulator:8080
+      GATEWAY_HTTP: http://gateway:8200
       PORT: 8100
       SERVICE_ID: pu_9
     ports:
@@ -142,10 +160,22 @@ services:
     depends_on:
       - ingestion
       - simulator
+      - gateway
     environment:
       BROKER_WS: ws://ingestion:8000/ws
       SIMULATOR_HTTP: http://simulator:8080
+      GATEWAY_HTTP: http://gateway:8200
       PORT: 8100
       SERVICE_ID: pu_10
     ports:
       - "8110:8100"
+  gateway:
+    build: ./gateway-service
+    depends_on:
+      - postgres
+    environment:
+      PORT: 8200
+      POSTGRES_DSN: postgresql://postgres:postgres@postgres:5432/seismic_data
+      PROCESSING_UNITS: http://processing_1:8100/health,http://processing_2:8100/health,http://processing_3:8100/health,http://processing_4:8100/health,http://processing_5:8100/health,http://processing_6:8100/health,http://processing_7:8100/health,http://processing_8:8100/health,http://processing_9:8100/health,http://processing_10:8100/health
+    ports:
+      - "8200:8200"

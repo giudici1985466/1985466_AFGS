@@ -1,0 +1,151 @@
+services:
+  simulator:
+    image: seismic-signal-simulator:multiarch_v1
+    ports:
+      - "8080:8080"
+  
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: seismic_data
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    
+  ingestion:
+    build: ./ingestion-service
+    depends_on:
+      - simulator
+    environment:
+      SIMULATOR_URL: http://simulator:8080
+      PORT: 8000
+    ports:
+      - "8000:8000"
+
+  processing_1:
+    build: ./pu-service
+    depends_on:
+    - ingestion
+    - simulator
+    environment:
+      BROKER_WS: ws://ingestion:8000/ws
+      SIMULATOR_HTTP: http://simulator:8080
+      PORT: 8100
+      SERVICE_ID: pu_1
+    ports:
+      - "8101:8100"
+
+  processing_2:
+    build: ./pu-service
+    depends_on:
+      - ingestion
+      - simulator
+    environment:
+      BROKER_WS: ws://ingestion:8000/ws
+      SIMULATOR_HTTP: http://simulator:8080
+      PORT: 8100
+      SERVICE_ID: pu_2
+    ports:
+      - "8102:8100"
+  
+  processing_3:
+    build: ./pu-service
+    depends_on:
+      - ingestion
+      - simulator
+    environment:
+      BROKER_WS: ws://ingestion:8000/ws
+      SIMULATOR_HTTP: http://simulator:8080
+      PORT: 8100
+      SERVICE_ID: pu_3
+    ports:
+      - "8103:8100"
+  
+  processing_4:
+    build: ./pu-service
+    depends_on:
+      - ingestion
+      - simulator
+    environment:
+      BROKER_WS: ws://ingestion:8000/ws
+      SIMULATOR_HTTP: http://simulator:8080
+      PORT: 8100
+      SERVICE_ID: pu_4
+    ports:
+      - "8104:8100"
+  processing_5:
+    build: ./pu-service
+    depends_on:
+      - ingestion
+      - simulator
+    environment:
+      BROKER_WS: ws://ingestion:8000/ws
+      SIMULATOR_HTTP: http://simulator:8080
+      PORT: 8100
+      SERVICE_ID: pu_5
+    ports:
+      - "8105:8100"
+  
+  processing_6:
+    build: ./pu-service
+    depends_on:
+      - ingestion
+      - simulator
+    environment:
+      BROKER_WS: ws://ingestion:8000/ws
+      SIMULATOR_HTTP: http://simulator:8080
+      PORT: 8100
+      SERVICE_ID: pu_6
+    ports:
+      - "8106:8100"
+  
+  processing_7:
+    build: ./pu-service
+    depends_on:
+      - ingestion
+      - simulator
+    environment:
+      BROKER_WS: ws://ingestion:8000/ws
+      SIMULATOR_HTTP: http://simulator:8080
+      PORT: 8100
+      SERVICE_ID: pu_7
+    ports:
+      - "8107:8100"
+  
+  processing_8:
+    build: ./pu-service
+    depends_on:
+      - ingestion
+      - simulator
+    environment:
+      BROKER_WS: ws://ingestion:8000/ws
+      SIMULATOR_HTTP: http://simulator:8080
+      PORT: 8100
+      SERVICE_ID: pu_8
+    ports:
+      - "8108:8100"
+
+  processing_9:
+    build: ./pu-service
+    depends_on:
+      - ingestion
+      - simulator
+    environment:
+      BROKER_WS: ws://ingestion:8000/ws
+      SIMULATOR_HTTP: http://simulator:8080
+      PORT: 8100
+      SERVICE_ID: pu_9
+    ports:
+      - "8109:8100"
+
+  processing_10:
+    build: ./pu-service
+    depends_on:
+      - ingestion
+      - simulator
+    environment:
+      BROKER_WS: ws://ingestion:8000/ws
+      SIMULATOR_HTTP: http://simulator:8080
+      PORT: 8100
+      SERVICE_ID: pu_10
+    ports:
+      - "8110:8100"

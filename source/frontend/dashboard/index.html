@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seismic Activity Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-page="dashboard">
+  <div class="page-shell">
+    <header class="topbar">
+      <div></div>
+      <h1>Seismic Activity Dashboard</h1>
+      <button id="goArchiveBtn" class="btn btn-primary">Archive</button>
+    </header>
+
+    <main class="dashboard-grid">
+      <section class="panel panel-large">
+        <div class="panel-header center">
+          <h2>Real-time Relevation</h2>
+        </div>
+
+        <div class="table-scroll tall">
+          <table class="data-table" id="liveEventsTable">
+            <thead>
+              <tr>
+                <th>Event ID</th>
+                <th>Hz</th>
+                <th>Type</th>
+                <th>Sensor ID</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel panel-small">
+        <div class="panel-header center">
+          <h2>Sensor Data</h2>
+        </div>
+
+        <div class="table-scroll medium">
+          <table class="data-table" id="unitsTable">
+            <thead>
+              <tr>
+                <th>Unit ID</th>
+                <th>State</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel panel-large">
+        <div class="panel-header center">
+          <h2>Sensor Data</h2>
+        </div>
+
+        <div class="table-scroll tall">
+          <table class="data-table" id="sensorsTable">
+            <thead>
+              <tr>
+                <th>Sensor ID</th>
+                <th>N. of Events</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel info-panel">
+        <div class="panel-header">
+          <h2>System Information</h2>
+        </div>
+
+        <div class="info-content" id="systemInfo"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="eventModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-top">
+        <h3>Event Details</h3>
+        <button id="closeModalBtn" class="icon-btn">&times;</button>
+      </div>
+      <div id="eventDetailsBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

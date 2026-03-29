@@ -150,31 +150,61 @@ I want the system to automatically ingest data from the sensors
 In order to have an uninterrupted data stream
 
 # Event schemas
+
 ## Broker event schema
+
 {
+
   "sensor_id": "string",
+  
   "timestamp": "ISO-8601 string",
+  
   "value": "number"
+
 }
+
+
 
 ## PU seismic event schema
+
 {
+
   "sensor_id": "string",
+  
   "sensor_name": "string|null",
+  
   "category": "string|null",
+  
   "region": "string|null",
+  
   "coordinates": "object|array|string|null",
+  
   "timestamp": "ISO-8601 string",
+  
   "dominant_frequency_hz": "number",
+  
   "peak_amplitude": "number",
+  
   "peak_spectrum": "number",
+  
   "event_type": "string",
+  
   "window_size": "integer"
+
 }
 
+
+
+
 ## PU status event
+
 {
+
   "service_id": "string",
+  
   "status": "string",
+  
   "timestamp": "ISO-8601 string"
+
 }
+

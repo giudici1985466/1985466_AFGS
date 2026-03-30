@@ -6,6 +6,20 @@ Detected seismic events are then sent to the gateway, which acts as the single e
 
 The system is organized into multiple backend services deployed with Docker Compose. The provided simulator is treated as an external service, while the platform components communicate over the internal Docker network.
 
+The simulator is provided externally by the instructors and is referenced in docker-compose.yml as a preloaded image.
+
+In our setup, the simulator image was imported beforehand and is expected to be available locally before running:
+
+docker compose up
+
+If needed, the image can be loaded from the provided archive according to the course instructions. On our machine, due to OCI archive compatibility, we imported it through a conversion step before loading it into Docker.
+```markdown
+skopeo copy oci-archive:seismic-signal-simulator-oci.tar docker-archive:seismic-signal-simulator-docker.tar:seismic-signal-simulator:multiarch_v1
+```
+and then
+```markdown
+docker load -i seismic-signal-simulator-docker.tar
+```
 
 # USER STORIES:
 

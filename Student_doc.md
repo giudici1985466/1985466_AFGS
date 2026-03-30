@@ -115,14 +115,15 @@ The Broker-Service is the custom fan-out component required by the project. It a
 - 25 - As a user, I want the system to automatically ingest data from the sensors, so that I can have an uninterrupted data stream.
 
 ### PORTS:
-No external ports exposed.
+8000:8000
 
 ### PERSISTENCE EVALUATION
 The broker does not persist data. It forwards measurements in real time.
 
 ### EXTERNAL SERVICES CONNECTIONS
 The service connects to:
-- Seismic-Simulator for device discovery and sensor streams
+- Seismic-Simulator REST API for health checks and sensor discovery
+- Seismic-Simulator WebSocket endpoints for real-time sensor data streaming
 - Processing-Service replicas for measurement redistribution
 
 ### MICROSERVICES:
@@ -130,16 +131,24 @@ The service connects to:
 #### MICROSERVICE: broker-service
 - TYPE: backend
 - DESCRIPTION: Custom broker that captures sensor measurements and forwards them to the processing units.
-- PORTS: none
+- PORTS: 8000
 
 - TECHNOLOGICAL SPECIFICATION:
 The microservice is implemented in Python using:
-    - FastAPI for internal APIs
-    - websockets for sensor stream consumption
-    - requests / httpx for internal service communication
+    - `FastAPI` for exposing the WebSocket broker endpoint and managing service lifecycle
+    - `uvicorn` as the ASGI server
+    - `httpx` for asynchronous HTTP communication with the simulator
+    - `websockets` for connecting to sensor telemetry streams
+    - `asyncio` for concurrent task scheduling and continuous stream handling
+    - `json` for parsing incoming sensor messages
 
 - SERVICE ARCHITECTURE:
 The broker retrieves the list of sensors from the simulator, opens one WebSocket connection per sensor, and forwards each incoming sensor measurement to all configured processing units through internal communication.
+- ENDPOINTS
+
+| PROTOCOL | METHOD | ENDPOINT  | Description                                      | 
+|----------|--------|------|--------------------------------------------------|
+| WS       | -      | /ws  | WebSocket endpoint for processing-unit replicas  | 
 ---
 
 # CONTAINER_NAME: Processing-Service
@@ -158,41 +167,46 @@ The Processing-Service is the analytical core of the platform. It runs as multip
 - 24 - As a user, I want the platform to remain operational even if some processing nodes fail, so that critical monitoring is not interrupted.
 
 ### PORTS:
-Internal only
+
 
 ### PERSISTENCE EVALUATION
 The processing units do not persist data directly. Sliding windows and intermediate analysis data are kept in memory, while detected events are forwarded to the gateway.
 
 ### EXTERNAL SERVICES CONNECTIONS
 The service connects to:
-- Broker-Service for incoming measurements
-- Seismic-Simulator control SSE stream
-- Gateway-API for forwarding detected seismic events
+
+- Broker WebSocket endpoint for real-time sensor event subscription
+- Simulator REST API for service readiness checks and sensor metadata retrieval
+- Simulator SSE control stream for receiving control commands
+- Gateway REST API for forwarding detected events
 
 ### MICROSERVICES:
 
 #### MICROSERVICE: processing-service
 - TYPE: backend
 - DESCRIPTION: Replicated service that performs FFT analysis and event classification.
-- PORTS: internal only
+- PORTS: 8100 (Although all processing-unit replicas listen on the same internal port (`8100`), the gateway performs health checks on each replica separately by using distinct Docker service names (`processing_1`, `processing_2`, ..., `processing_10`) as hostnames within the internal Docker network.)
 
 - TECHNOLOGICAL SPECIFICATION:
 The microservice is implemented in Python using:
-    - FastAPI for internal endpoints and health checks
-    - NumPy / SciPy for FFT-based processing
-    - SSE client utilities for consuming the control stream
-    - requests / httpx for sending detected events to the gateway
+  - `FastAPI` for exposing the health-check endpoint and managing service lifecycle
+  - `uvicorn` as the ASGI server
+  - `httpx` for asynchronous HTTP communication with simulator and gateway services
+  - `websockets` for subscribing to the broker event stream
+  - `asyncio` for concurrent task scheduling and continuous stream handling
+  - `numpy` for numerical processing and FFT-based spectral analysis
+  - `collections.deque` for maintaining sliding windows of sensor samples
+  - `json` for parsing incoming broker messages
+  - `os` and `time` for process control and timestamp handling
 
 - SERVICE ARCHITECTURE:
-Each processing unit receives measurements from the broker and maintains an in-memory sliding window for each sensor. Once the window is full, the dominant frequency is computed and the event is classified. Relevant detections are sent to the gateway, which is responsible for persistence and external exposure. Each replica exposes a health endpoint and listens to the simulator control stream in order to terminate on command.
+The service follows an event-driven stream-processing architecture. At startup, it waits for the simulator to become available through its health endpoint, then retrieves sensor metadata from the simulator REST API and stores it locally. This metadata is used during analysis to enrich detections with contextual information such as sensor name, category, region, coordinates, and sampling rate.
 
-- ENDPOINTS:
+- ENDPOINTS
 
-    | HTTP METHOD | URL | Description | User Stories |
-    |-------------|-----|-------------|-------------|
-    | GET | /health | Replica health check | 1, 2, 3, 24 |
-    | POST | /ingest | Internal endpoint used by the broker to forward measurements | 4, 25 |
-    | GET | /replica-info | Returns replica runtime information | 1, 2, 3 |
+| PROTOCOL | METHOD | ENDPOINT | Description |
+|----------|--------|----------|-------------|
+| HTTP | GET | `/health` | Health-check endpoint for each processing-unit replica. |
 
 ---
 
@@ -214,7 +228,7 @@ PostgreSQL is the shared persistence layer of the platform. It stores processed 
 - 23 - As a user, I want to filter the detected events, so that I can have a location-based view.
 
 ### PORTS:
-5432:5432
+None
 
 ### PERSISTENCE EVALUATION
 This is the main persistent storage component of the platform.
@@ -247,7 +261,8 @@ The gateway stores processed seismic events in the database and retrieves them f
 # CONTAINER_NAME: Gateway-API
 
 ### DESCRIPTION:
-The Gateway-API is the single entry point between the frontend and the backend services. It receives detected seismic events from the processing units, stores and retrieves processed seismic events from PostgreSQL, monitors the health of the processing replicas, and exposes the REST and SSE endpoints used by the dashboard.
+Central API gateway that receives detected events from processing-unit replicas, stores them in PostgreSQL with duplicate protection, exposes event retrieval endpoints for the frontend, and monitors the health status of all processing replicas.
+
 
 ### USER STORIES:
 - 1 - As a user, I want to see the status of all processing units, so that I can monitor the operational condition of the system.
@@ -271,15 +286,15 @@ The Gateway-API is the single entry point between the frontend and the backend s
 - 24 - As a user, I want the platform to remain operational even if some processing nodes fail, so that critical monitoring is not interrupted.
 
 ### PORTS:
-8000:8000
+8200:8200
 
 ### PERSISTENCE EVALUATION
 The gateway does not maintain its own long-term runtime state, but it is responsible for writing and reading persistent event data in PostgreSQL.
 
 ### EXTERNAL SERVICES CONNECTIONS
 The service connects to:
-- Processing-Service replicas for health checks and detected-event intake
-- PostgreSQL for persistent storage and event retrieval
+- PostgreSQL for persistent storage of detected events
+- Processing-unit replicas for periodic health checks
 
 ### MICROSERVICES:
 
@@ -290,27 +305,30 @@ The service connects to:
 
 - TECHNOLOGICAL SPECIFICATION:
 The microservice is implemented in Python using:
-    - FastAPI for REST/SSE APIs
-    - Uvicorn as the application server
-    - psycopg2 or SQLAlchemy for PostgreSQL access
-    - requests / httpx for communication with processing replicas
+  - `FastAPI` for exposing the REST API and managing the application lifecycle
+  - `uvicorn` as the ASGI server
+  - `asyncpg` for asynchronous PostgreSQL connection pooling and SQL execution
+  - `httpx` for asynchronous HTTP communication with processing-unit replicas during heartbeat monitoring
+  - `asyncio` for concurrent background tasks
+  - `pydantic` for request payload validation
+  - `fastapi.middleware.cors.CORSMiddleware` for enabling frontend access from allowed origins
+  - `json` for event serialization
+  - `datetime` for timestamp parsing, normalization, and serialization
 
 - SERVICE ARCHITECTURE:
-The gateway receives detected seismic events from the processing units, stores them in PostgreSQL, queries the database for historical and statistical views, periodically checks the health of the processing units, and exposes the data needed by the frontend.
+The service follows a gateway-and-persistence architecture. At startup, it waits for PostgreSQL to become available, initializes the database connection pool, and creates the `events` table if it does not already exist. It then launches a background heartbeat loop that periodically polls all configured processing-unit health endpoints.
 
 - ENDPOINTS:
+ 
+| Protocol | Method | Endpoint | Description |
+|----------|--------|----------|-------------|
+| HTTP | GET | `/health` | Gateway health-check endpoint. |
+| HTTP | POST | `/api/detections` | Receives detected events from processing-unit replicas and stores them in the database with deduplication. |
+| HTTP | GET | `/api/live` | Returns the latest detected events, limited to the most recent records. |
+| HTTP | GET | `/api/events` | Returns the complete list of stored detected events. |
+| HTTP | GET | `/api/processing-status` | Returns the health and availability status of all configured processing-unit replicas. |
 
-    | HTTP METHOD | URL | Description | User Stories |
-    |-------------|-----|-------------|-------------|
-    | GET | /health | Service health check | 24 |
-    | POST | /api/events | Receives detected seismic events from processing units | 4, 24 |
-    | GET | /api/events/latest | Returns the latest detected events | 4, 7 |
-    | GET | /api/events/history | Returns historical events with filters | 19, 20, 21, 22, 23 |
-    | GET | /api/events/mtbe | Returns MTBE values grouped by event type and/or sensor | 16, 17, 18 |
-    | GET | /api/stream/events | SSE endpoint for live event updates | 4 |
-    | GET | /api/processing-units | Returns processing units status and last health-check timestamps | 1, 2, 3 |
-    | GET | /api/sensors | Returns sensor metadata and event counters | 12, 13, 14, 15 |
-    | GET | /api/system/config | Returns system configuration information | 5 |
+    
 
 # CONTAINER_NAME: Frontend
 
@@ -346,7 +364,9 @@ None (static web application)
 The frontend does not persist data. It retrieves all information from the Gateway-API.
 
 ### EXTERNAL SERVICES CONNECTIONS
-The frontend communicates only with the Gateway-API via HTTP requests and SSE.
+The frontend connects to the Gateway API through the following base URL:
+
+- `http://localhost:8200/api`
 
 ### MICROSERVICES:
 

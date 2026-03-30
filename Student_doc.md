@@ -116,7 +116,8 @@ The Broker-Service is the custom fan-out component required by the project. It a
 - 25 - As a user, I want the system to automatically ingest data from the sensors, so that I can have an uninterrupted data stream.
 
 ### PORTS:
-8000:8000
+  - Internal: `8000`
+  - External: `8000`
 
 ### PERSISTENCE EVALUATION
 The broker does not persist data. It forwards measurements in real time.

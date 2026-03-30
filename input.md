@@ -61,7 +61,7 @@ The system is organized into multiple backend services deployed with Docker Comp
 # Event schemas
 
 ## Broker event schema
-The broker collects data from each available simulation sensor after discovering them, then it appends the sensor id to received detection and distributes it to the PUs
+The broker discovers the available simulator sensors, subscribes to their measurement streams, appends the corresponding sensor identifier to each received sample, and redistributes the normalized event to all connected processing units.
 ```json
 {
   "sensor_id": "string",
@@ -76,16 +76,17 @@ PUs connect to the broker upon startup and start receiving data in the broker ev
 ```json
 {
   "sensor_id": "string",
-  "sensor_name": "string|null",
-  "category": "string|null",
-  "region": "string|null",
-  "coordinates": "object|array|string|null"
+  "sensor_name": "string",
+  "category": "string",
+  "region": "string",
+  "coordinates": "object",
   "timestamp": "ISO-8601 string",
   "dominant_frequency_hz": "number",
   "peak_amplitude": "number",
   "peak_spectrum": "number",
   "event_type": "string",
-  "window_size": "integer"
+  "window_size": "integer",
+  "service_id": "string"
 }
 ```
 

@@ -290,7 +290,9 @@ Central API gateway that receives detected events from processing-unit replicas,
 - 24 - As a user, I want the platform to remain operational even if some processing nodes fail, so that critical monitoring is not interrupted.
 
 ### PORTS:
-8200:8200
+ PORTS:
+  - Internal: `8200`
+  - External: `8200`
 
 ### PERSISTENCE EVALUATION
 The gateway does not maintain its own long-term runtime state, but it is responsible for writing and reading persistent event data in PostgreSQL.
@@ -305,7 +307,7 @@ The service connects to:
 #### MICROSERVICE: gateway-api
 - TYPE: backend
 - DESCRIPTION: Main REST API entry point consumed by the frontend and by the processing-service replicas.
-- PORTS: 8000
+- PORTS: 8200
 
 - TECHNOLOGICAL SPECIFICATION:
 The microservice is implemented in Python using:

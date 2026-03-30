@@ -61,59 +61,39 @@ The system is organized into multiple backend services deployed with Docker Comp
 # Event schemas
 
 ## Broker event schema
-
+```json
 {
-
   "sensor_id": "string",
-  
   "timestamp": "ISO-8601 string",
-  
   "value": "number"
-
 }
-
+```
 
 
 ## PU seismic event schema
-
+```json
 {
-
   "sensor_id": "string",
-  
   "sensor_name": "string|null",
-  
   "category": "string|null",
-  
   "region": "string|null",
-  
-  "coordinates": "object|array|string|null",
-  
+  "coordinates": "object|array|string|null"
   "timestamp": "ISO-8601 string",
-  
   "dominant_frequency_hz": "number",
-  
   "peak_amplitude": "number",
-  
   "peak_spectrum": "number",
-  
   "event_type": "string",
-  
   "window_size": "integer"
-
 }
-
+```
 
 
 
 ## PU status event
-
+```json
 {
-
   "service_id": "string",
-  
   "status": "string",
-  
   "timestamp": "ISO-8601 string"
-
 }
-
+```

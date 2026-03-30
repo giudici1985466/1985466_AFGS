@@ -19,13 +19,13 @@ The system is organized into multiple backend services deployed with Docker Comp
 
 5. As a user, I want to see system configuration info, In order to have an overview about the monitoring process  
 
-6. As a user, I want see only relevant detected events, In order to avoid noise in the dashboard  
+6. As a user, I want to see only relevant detected events, In order to avoid noise in the dashboard  
 
 7. As a user, I want to have a detailed view of a detected event, In order to inspect all the information related to the event   
 
 8. As a user, I want to have an event classified as an earthquake when the dominant frequency is between 0.5 and 3.0 Hz, In order to easily identify the earthquake event  
 
-9. As a user, I want to to have an event classified as a conventional explosion when the dominant frequency is between 3.0 and 8.0 Hz, In order to easily identify the conventional explosion event  
+9. As a user, I want to have an event classified as a conventional explosion when the dominant frequency is between 3.0 and 8.0 Hz, In order to easily identify the conventional explosion event  
 
 10. As a user, I want to have an event classified a nuclear-like when the dominant frequency is at least 8.0 Hz, In order to easily identify the nuclear-like event  
 
@@ -205,8 +205,14 @@ The microservice is implemented in Python using:
   - `os` and `time` for process control and timestamp handling
 
 - SERVICE ARCHITECTURE:
+- SERVICE ARCHITECTURE:
 The service follows an event-driven stream-processing architecture. At startup, it waits for the simulator to become available through its health endpoint, then retrieves sensor metadata from the simulator REST API and stores it locally. This metadata is used during analysis to enrich detections with contextual information such as sensor name, category, region, coordinates, and sampling rate.
 
+Each replica then starts two concurrent background loops. The first connects to the broker WebSocket endpoint and continuously receives normalized sensor measurements. For each sensor, the replica stores incoming values in a sliding window buffer. Once enough samples are available, the signal is periodically analyzed through FFT in order to identify the dominant frequency component and classify the event according to the project rules.
+
+The second loop connects to the simulator SSE control stream and listens for control commands. When a shutdown command is received, the replica terminates, allowing the platform to simulate processing-node failures.
+
+When a valid seismic event is detected, the processing unit enriches it with sensor metadata and its own replica identifier, then forwards it to the gateway through the `/api/detections` endpoint.
 - ENDPOINTS
 
 | PROTOCOL | METHOD | ENDPOINT | Description |
@@ -325,6 +331,10 @@ The microservice is implemented in Python using:
 
 - SERVICE ARCHITECTURE:
 The service follows a gateway-and-persistence architecture. At startup, it waits for PostgreSQL to become available, initializes the database connection pool, and creates the `events` table if it does not already exist. It then launches a background heartbeat loop that periodically polls all configured processing-unit health endpoints.
+
+Detected events sent by the processing replicas are received through `POST /api/detections`. For each event, the gateway parses the timestamp, computes a temporal bucket, and writes the event into PostgreSQL. Duplicate-safe persistence is enforced through a uniqueness constraint on `(sensor_id, event_type, time_bucket)`.
+
+The gateway also exposes read endpoints for the frontend. `GET /api/live` returns the most recent stored events, `GET /api/events` returns the full historical archive, and `GET /api/processing-status` exposes the current monitoring state of the processing replicas.
 
 - ENDPOINTS:
  

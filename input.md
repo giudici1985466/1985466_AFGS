@@ -38,11 +38,11 @@ The system is organized into multiple backend services deployed with Docker Comp
 
 15. As a user, I want to know the location of each sensor, In order to identify the monitored area associated with each sensor  
 
-16. As a user, I want to see the mean time between earthquake events for each sensor, In order to estimate how often they happen  
+16. As a user, I want to see the mean time between earthquake events, In order to estimate how often they happen  
 
-17. As a user, I want to see the mean time between conventional explosion events for each sensor, In order to estimate how often they happen  
+17. As a user, I want to see the mean time between conventional explosion events, In order to estimate how often they happen  
 
-18. As a user, I want to see the mean time between nuclear explosion events for each sensor, In order to estimate how often they happen  
+18. As a user, I want to see the mean time between nuclear explosion events, In order to estimate how often they happen  
 
 19. As a user, I want to see historical data about detected events, In order to perform analysis on them  
 

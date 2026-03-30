@@ -18,13 +18,13 @@ The system is organized into multiple backend services deployed with Docker Comp
 
 5. As a user, I want to see system configuration info, In order to have an overview about the monitoring process  
 
-6. As a user, I want see only relevant detected events, In order to avoid noise in the dashboard  
+6. As a user, I want to see only relevant detected events, In order to avoid noise in the dashboard  
 
 7. As a user, I want to have a detailed view of a detected event, In order to inspect all the information related to the event   
 
 8. As a user, I want to have an event classified as an earthquake when the dominant frequency is between 0.5 and 3.0 Hz, In order to easily identify the earthquake event  
 
-9. As a user, I want to to have an event classified as a conventional explosion when the dominant frequency is between 3.0 and 8.0 Hz, In order to easily identify the conventional explosion event  
+9. As a user, I want to have an event classified as a conventional explosion when the dominant frequency is between 3.0 and 8.0 Hz, In order to easily identify the conventional explosion event  
 
 10. As a user, I want to have an event classified a nuclear-like when the dominant frequency is at least 8.0 Hz, In order to easily identify the nuclear-like event  
 

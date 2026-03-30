@@ -1,3 +1,11 @@
+# SYSTEM DESCRIPTION:
+
+Seismic Monitoring and Analysis Platform is a distributed and fault-tolerant system for real-time seismic event detection and historical analysis. The platform collects seismic measurements from the provided simulator, redistributes them through a custom broker, and processes them using multiple replicated processing units. Each processing replica maintains a sliding window of samples for each sensor, applies frequency-domain analysis through FFT, extracts the dominant frequency component, and classifies the event according to the project rule model.
+
+Detected seismic events are then sent to the gateway, which acts as the single entry point between the frontend and the backend services. The gateway is responsible for collecting detected events from the processing units, storing and retrieving processed seismic events from the shared PostgreSQL database, and monitoring the health of the replicated processing units. A web dashboard allows users to inspect live detections, processing unit status, sensor metadata, system configuration, and historical event data.
+
+The system is organized into multiple backend services deployed with Docker Compose. The provided simulator is treated as an external service, while the platform components communicate over the internal Docker network.
+
 # User stories
 
 ## 1 

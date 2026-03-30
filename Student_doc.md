@@ -231,7 +231,8 @@ PostgreSQL is the shared persistence layer of the platform. It stores processed 
 - 23 - As a user, I want to filter the detected events, so that I can have a location-based view.
 
 ### PORTS:
-None
+- Internal: `5432`
+- External: not exposed by default in the current Docker Compose configuration
 
 ### PERSISTENCE EVALUATION
 This is the main persistent storage component of the platform.

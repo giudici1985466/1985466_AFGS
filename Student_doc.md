@@ -39,11 +39,11 @@ The system is organized into multiple backend services deployed with Docker Comp
 
 15. As a user, I want to know the location of each sensor, In order to identify the monitored area associated with each sensor  
 
-16. As a user, I want to see the mean time between earthquake events for each sensor, In order to estimate how often they happen  
+16. As a user, I want to see the mean time between earthquake events, In order to estimate how often they happen  
 
-17. As a user, I want to see the mean time between conventional explosion events for each sensor, In order to estimate how often they happen  
+17. As a user, I want to see the mean time between conventional explosion events, In order to estimate how often they happen  
 
-18. As a user, I want to see the mean time between nuclear explosion events for each sensor, In order to estimate how often they happen  
+18. As a user, I want to see the mean time between nuclear explosion events, In order to estimate how often they happen  
 
 19. As a user, I want to see historical data about detected events, In order to perform analysis on them  
 
@@ -143,7 +143,7 @@ The microservice is implemented in Python using:
     - `json` for parsing incoming sensor messages
 
 - SERVICE ARCHITECTURE:
-The broker retrieves the list of sensors from the simulator, opens one WebSocket connection per sensor, and forwards each incoming sensor measurement to all configured processing units through internal communication.
+The broker retrieves the list of sensors from the simulator, opens one WebSocket connection per sensor, and forwards each incoming sensor measurement to all connected processing-unit replicas through its internal WebSocket endpoint.
 - ENDPOINTS
 
 | PROTOCOL | METHOD | ENDPOINT  | Description                                      | 
@@ -167,7 +167,11 @@ The Processing-Service is the analytical core of the platform. It runs as multip
 - 24 - As a user, I want the platform to remain operational even if some processing nodes fail, so that critical monitoring is not interrupted.
 
 ### PORTS:
-
+- Internal: `8100`
+- External: `8101`–`8110` (one mapped host port per replica)
+### PORT USAGE:
+All processing-service replicas listen internally on port `8100`.  
+The gateway performs health checks using the Docker service names (`processing_1`, ..., `processing_n`) and the internal port `8100`, for example `http://processing_1:8100/health`.
 
 ### PERSISTENCE EVALUATION
 The processing units do not persist data directly. Sliding windows and intermediate analysis data are kept in memory, while detected events are forwarded to the gateway.
@@ -185,8 +189,7 @@ The service connects to:
 #### MICROSERVICE: processing-service
 - TYPE: backend
 - DESCRIPTION: Replicated service that performs FFT analysis and event classification.
-- PORTS: 8100 (Although all processing-unit replicas listen on the same internal port (`8100`), the gateway performs health checks on each replica separately by using distinct Docker service names (`processing_1`, `processing_2`, ..., `processing_10`) as hostnames within the internal Docker network.)
-
+- PORTS: 8100 
 - TECHNOLOGICAL SPECIFICATION:
 The microservice is implemented in Python using:
   - `FastAPI` for exposing the health-check endpoint and managing service lifecycle
@@ -252,9 +255,9 @@ The gateway stores processed seismic events in the database and retrieves them f
 
 - DB STRUCTURE:
 
-    **detected_events**
+    **events**
 
-        | id  | sensor_id  | sensor_name  | category  | region  | latitude  | longitude  | event_type  | event_timestamp  | time_bucket  | dominant_frequency_hz  | peak_amplitude  |peak_spectrum  | window_size | reported_by  | created_at |
+    | id | sensor_id | sensor_name | category | region | coordinates | event_type | event_timestamp | time_bucket | dominant_frequency_hz | peak_amplitude | peak_spectrum | window_size | reported_by | created_at |
 
 ---
 
@@ -300,7 +303,7 @@ The service connects to:
 
 #### MICROSERVICE: gateway-api
 - TYPE: backend
-- DESCRIPTION: Main REST/SSE entry point consumed by the frontend.
+- DESCRIPTION: Main REST API entry point consumed by the frontend and by the processing-service replicas.
 - PORTS: 8000
 
 - TECHNOLOGICAL SPECIFICATION:
@@ -383,6 +386,14 @@ The frontend is implemented using:
 
 - SERVICE ARCHITECTURE:
 The frontend is composed of two main pages. The dashboard page provides a live view of the event detections, the system status, the list of sensor and the list of processing unit. The archive page provides historical exploration and filtering of stored events.
+
+- CONSUMED ENDPOINTS:
+
+| Protocol | Method | Endpoint | Description |
+|----------|--------|----------|-------------|
+| HTTP | GET | `/api/live` | Retrieves recent detected events for the dashboard. |
+| HTTP | GET | `/api/events` | Retrieves the historical archive of detected events. |
+| HTTP | GET | `/api/processing-status` | Retrieves the status of the processing-unit replicas. |
 
 - PAGES:
 

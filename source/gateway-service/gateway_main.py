@@ -88,7 +88,7 @@ def parse_ts(ts: str) -> datetime:
 
 def second_bucket(ts: str) -> datetime:
     dt = parse_ts(ts).astimezone(timezone.utc).replace(microsecond=0)
-    bucket_second = dt.second - (dt.second % 3)  # 3-second window
+    bucket_second = dt.second - (dt.second % 5)  # 5-second window
     return dt.replace(second=bucket_second)
 
 def serialize(row):

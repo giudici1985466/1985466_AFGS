@@ -181,6 +181,15 @@ function renderLiveEvents(events) {
   });
 }
 
+function formatDateTime(timestamp) {
+  if (!timestamp || timestamp === "-") return "-";
+
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return String(timestamp);
+
+  return date.toISOString().replace("T", " ").substring(0, 19) + " UTC";
+}
+
 function renderProcessingUnits(units) {
   const tbody = document.querySelector("#unitsTable tbody");
   if (!tbody) return;
@@ -193,6 +202,7 @@ function renderProcessingUnits(units) {
     row.innerHTML = `
       <td>${escapeHtml(unit.id)}</td>
       <td class="${unit.stateClass}">${escapeHtml(unit.stateLabel)}</td>
+      <td>${escapeHtml(unit.lastChecked)}</td>
     `;
 
     tbody.appendChild(row);
@@ -488,7 +498,8 @@ function normalizeProcessingUnit(unit) {
   return {
     id: unit.service_id || unit.url || "-",
     stateLabel,
-    stateClass
+    stateClass,
+    lastChecked: formatDateTime(unit.last_ok_at)
   };
 }
 

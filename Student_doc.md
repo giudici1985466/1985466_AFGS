@@ -78,7 +78,8 @@ The Seismic-Simulator provides the external seismic environment of the platform.
 - 25 - As a user, I want the system to automatically ingest data from the sensors, so that I can have an uninterrupted data stream.
 
 ### PORTS:
-8080:8080
+  - Internal: `8080`
+  - External: `8080`
 
 ### PERSISTENCE EVALUATION
 The simulator does not persist platform data. It only generates runtime measurements and failure-control events.

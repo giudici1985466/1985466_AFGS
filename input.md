@@ -61,6 +61,7 @@ The system is organized into multiple backend services deployed with Docker Comp
 # Event schemas
 
 ## Broker event schema
+The broker collects data from each available simulation sensor after discovering them, then it appends the sensor id to received detection and distributes it to the PUs
 ```json
 {
   "sensor_id": "string",
@@ -71,6 +72,7 @@ The system is organized into multiple backend services deployed with Docker Comp
 
 
 ## PU seismic event schema
+PUs connect to the broker upon startup and start receiving data in the broker event schema format. Each PU has a data structure for every available sensor. After detecting an event by computing FFT on a sliding windows a seismic event is produced according to the following schema. The same schema is then used by the gateway to perform duplicate processing and to send data to the DB.
 ```json
 {
   "sensor_id": "string",
@@ -90,6 +92,7 @@ The system is organized into multiple backend services deployed with Docker Comp
 
 
 ## PU status event
+PUs are periodically polled by the gateway in order to determine their status. The response has the following format
 ```json
 {
   "service_id": "string",

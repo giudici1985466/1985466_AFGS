@@ -261,12 +261,20 @@ function renderArchiveEvents(events) {
 
     row.innerHTML = `
       <td>${escapeHtml(event.id)}</td>
-      <td>${escapeHtml(event.type)}</td>
-      <td>${escapeHtml(formatFrequencyPlain(event.frequency))}</td>
       <td>${escapeHtml(event.sensorId)}</td>
+      <td>${escapeHtml(event.sensorName)}</td>
+      <td class="${getTypeClass(event.type)}">${escapeHtml(event.type)}</td>
       <td>${formatTimestampForTable(event.timestamp)}</td>
+      <td>${escapeHtml(event.region)}</td>
+      <td>${escapeHtml(event.category)}</td>
+      <td>${escapeHtml(formatFrequencyPlain(event.frequency))}</td>
+      <td>${escapeHtml(String(event.amplitude))}</td>
+      <td>${escapeHtml(String(event.peakSpectrum))}</td>
+      <td>${escapeHtml(String(event.windowSize))}</td>
+      <td>${escapeHtml(event.reportedBy)}</td>
       <td>${escapeHtml(event.latitude)}</td>
       <td>${escapeHtml(event.longitude)}</td>
+      <td>${formatTimestampForTable(event.createdAt)}</td>
     `;
 
     tbody.appendChild(row);
@@ -608,7 +616,7 @@ function computeMTBE(events, type) {
   for (let i = 1; i < filtered.length; i++) {
     const prev = new Date(filtered[i-1].timestamp).getTime();
     const curr = new Date(filtered[i].timestamp).getTime();
-    totalDiffMs = curr - prev;
+    totalDiffMs += curr - prev;
   }
 
   const avgMs = totalDiffMs / (filtered.length - 1);

@@ -9,9 +9,9 @@ The system is organized into multiple backend services deployed with Docker Comp
 The simulator is provided externally by the instructors and is referenced in docker-compose.yml as a preloaded image.
 
 In our setup, the simulator image was imported beforehand and is expected to be available locally before running:
-
+```markdown
 docker compose up
-
+```
 If needed, the image can be loaded from the provided archive according to the course instructions. On our machine, due to OCI archive compatibility, we imported it through a conversion step before loading it into Docker.
 ```markdown
 skopeo copy oci-archive:seismic-signal-simulator-oci.tar docker-archive:seismic-signal-simulator-docker.tar:seismic-signal-simulator:multiarch_v1

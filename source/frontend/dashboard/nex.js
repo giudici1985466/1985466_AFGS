@@ -334,7 +334,7 @@ function applyArchiveFiltersClientSide() {
   const longitudeToValue = getInputValue("longitudeToFilter");
 
   const dateFrom = dateFromValue ? new Date(dateFromValue) : null;
-  const dateTo = dateToValue ? new Date(dateToValue + "T23:59:59") : null;
+  const dateTo = dateToValue ? new Date(dateToValue) : null;
 
   const latitudeFrom = latitudeFromValue !== "" ? parseFloat(latitudeFromValue) : null;
   const latitudeTo = latitudeToValue !== "" ? parseFloat(latitudeToValue) : null;
